@@ -1,6 +1,4 @@
 ﻿uses Algorithms;
-uses TransportTaskCalculations;
-
 var
   
   matrixExample := new real[3,4](
@@ -19,5 +17,5 @@ var
 
 begin
   var tempMatrix:= transportTask.minTariffMethod();
-  printMatrix(tempMatrix);
+  writeln(transportTask.calculateFunction(tempMatrix));
 end.

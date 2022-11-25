@@ -19,15 +19,15 @@ type TransportTaskSolver = record
   end;
   
   procedure Print;  
-  function minTariffMethod(): array[,] of real; 
+  function minTariffMethod(): array[,] of real;
+  function calculateFunction(matrix: array[,] of real): real;
   
 end;
 
 //functions
 function findIndecesOfMinRate(matrix: array[,] of real): (integer, integer);
-//nction minTariffMethod(matrix: array[,] of real; storages: array of real;  shops: array of real): array[,] of real;
 function getIndexOfMinInRow(matrix: array[,] of real; row: integer; member: array of real; isRowVertical: boolean): integer;
-function isMemberEmpty(member: array of real): Boolean;
+function isMemberEmpty(member: array of real): boolean;
 
 //procedires
 procedure printMatrix(matrix: array[,] of real);
@@ -42,14 +42,6 @@ begin
     write('a' + i:charSpace );
   Writeln();
   Writeln('————————————————————————————————————————————————————');
-  {for var i := 0 to self.baseMatrix.GetLength(0) - 1 do
-  begin
-    Write(self.columnStringX[i]:charSpace, '│');
-    Write(self.baseMatrix[i, 0]:charSpace:2, '│');
-    for var j := 1 to Length(self.baseMatrix, 1) - 1 do
-      Write(self.baseMatrix[i, j]:charSpace:2);
-    Writeln();
-  end;}
 end;
 
 function findIndecesOfMinRate(matrix: array[,] of real): (integer, integer);
@@ -72,12 +64,8 @@ begin
   k:= indeces.Item1;
   s:= indeces.Item2;  
   repeat
-    writeln('k = ', k);
-    writeln('s = ', s);
-    var minimal:= min(self.storagesVector[k], self.shopsVector[s]);
-    writeln('min = ', minimal);
     //Шаг 2
-    Result[k, s]:= minimal;    
+    Result[k, s]:= min(self.storagesVector[k], self.shopsVector[s]);    
     //Шаг 3
     self.storagesVector[k] -= Result[k,s];
     self.shopsVector[s] -= Result[k,s];
@@ -126,6 +114,14 @@ begin
         Result:= j;
       end;
   end;         
+end;
+
+function TransportTaskSolver.calculateFunction(matrix: array[,] of real): real;
+begin
+  Result:= 0;
+  for var i := 0 to self.storagesVector.Length - 1 do
+    for var j := 0 to self.shopsVector.Length - 1 do
+      Result := Result + (self.rateMatrix[i,j] * matrix[i,j]);
 end;
 
 procedure printMatrix(matrix: array[,] of real);
