@@ -1,6 +1,8 @@
 ﻿uses Algorithms;
+uses TransportTaskCalculations;
 
 var
+  
   matrixExample := new real[3,4](
     (2, 1, 3, 2),
     (2, 3, 3, 1),
@@ -16,6 +18,6 @@ var
   );
 
 begin
-  var tempMatrix:= minTariffMethod(matrixExample, storagesVectorExample, shopsVectorExample);
+  var tempMatrix:= transportTask.minTariffMethod();
   printMatrix(tempMatrix);
 end.

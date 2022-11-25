@@ -7,9 +7,6 @@ type TransportTaskSolver = record
   storagesVector: array of real;
   shopsVector: array of real;
   
-  //storageStrings: array of string;
-  //shopStrings: array of string;
-  
   public constructor Create(
     rateMatrix: array[,] of real;
     storagesVector: array of real;
@@ -19,23 +16,17 @@ type TransportTaskSolver = record
     self.rateMatrix := rateMatrix;
     self.storagesVector := storagesVector;
     self.shopsVector := shopsVector;
-    //storageStrings:= GetVectorStrings(storagesVector);
-    //shopStrings:= GetVectorStrings(shopsVector);
   end;
   
-  procedure Print;
-  //function GetVectorStrings(vectorToString: array of real): array of string;
+  procedure Print;  
+  function minTariffMethod(): array[,] of real; 
   
 end;
 
 //functions
 function findIndecesOfMinRate(matrix: array[,] of real): (integer, integer);
-
-
-//function GetVectorStrings(vectorToString: array of real): array of string;
-
-function minTariffMethod(matrix: array[,] of real; storages: array of real;  shops: array of real): array[,] of real;
-function getIndexOfMinInRow(matrix: array[,] of real; row: integer; isRowVertical: boolean): integer;
+//nction minTariffMethod(matrix: array[,] of real; storages: array of real;  shops: array of real): array[,] of real;
+function getIndexOfMinInRow(matrix: array[,] of real; row: integer; member: array of real; isRowVertical: boolean): integer;
 function isMemberEmpty(member: array of real): Boolean;
 
 //procedires
@@ -61,16 +52,6 @@ begin
   end;}
 end;
 
-
-{function TransportTaskSolver.GetVectorStrings(vectorToString: array of real): array of string;
-begin
-  var len := vectorToString.Length;
-  Result := new string[len];
-  for var i := 0 to len do 
-    Result[i]:= char(96+i);
-end;
-}
-
 function findIndecesOfMinRate(matrix: array[,] of real): (integer, integer);
 begin
   Result:= (0,0);  
@@ -80,84 +61,71 @@ begin
         Result:= (i, j);  
 end;
 
-function minTariffMethod(matrix: array[,] of real; storages: array of real;  shops: array of real): array[,] of real;
+function TransportTaskSolver.minTariffMethod(): array[,] of real;
 var
   k, s: integer;
   flag:= true;
 begin
-  Result:= new real[matrix.GetLength(0), matrix.GetLength(1)];
+  Result:= new real[self.rateMatrix.GetLength(0), self.rateMatrix.GetLength(1)];
   //Шаг 1
-  var indeces := findIndecesOfMinRate(matrix);  
+  var indeces := findIndecesOfMinRate(self.rateMatrix);  
   k:= indeces.Item1;
-  s:= indeces.Item2;
-  
+  s:= indeces.Item2;  
   repeat
-    writeln('D:');
+    writeln('k = ', k);
+    writeln('s = ', s);
+    var minimal:= min(self.storagesVector[k], self.shopsVector[s]);
+    writeln('min = ', minimal);
     //Шаг 2
-    Result[k, s]:= min(storages[k], shops[s]);    
+    Result[k, s]:= minimal;    
     //Шаг 3
-    storages[k] -= Result[k,s];
-    shops[s] -= Result[k,s];
+    self.storagesVector[k] -= Result[k,s];
+    self.shopsVector[s] -= Result[k,s];
     //Шаг 4
-    if(storages[k] = 0) then begin
-      k:= getIndexOfMinInRow(matrix, s, true);
-        continue;
+    if(self.storagesVector[k] = 0) then begin
+      k:= getIndexOfMinInRow(self.rateMatrix, s, self.storagesVector, true);
+      if(self.shopsVector[s] = 0) then
+        s:= getIndexOfMinInRow(self.rateMatrix, k, self.shopsVector, false);
     end
     //Шаг 6
-    else begin
-      s:= getIndexOfMinInRow(matrix, k, false);
-      continue;
+    else if(self.shopsVector[s] = 0) then begin
+      s:= getIndexOfMinInRow(self.rateMatrix, k, self.shopsVector, false);
+      if(self.storagesVector[k] = 0) then
+        k:= getIndexOfMinInRow(self.rateMatrix, s, self.storagesVector, true);
     end;
-  until (isMemberEmpty(storages) = true) and (isMemberEmpty(shops) = true);
-  
-  {while(flag) do begin
-    //Шаг 2
-    Result[k, s]:= min(storages[k], shops[s]);
-    
-    //Шаг 3
-    storages[k] -= Result[k,s];
-    shops[s] -= Result[k,s];
-    
-    //Шаг 4
-    if(storages[k] = 0) then begin
-      //Шаг 7
-      if(isMemberEmpty(storages)) then flag:= false
-      //Шаг 8
-      else begin
-        k:= getIndexOfMinInRow(matrix, s, true);
-        continue;
-      end;    
-    end
-    //Шаг 5
-    else if(isMemberEmpty(shops)) then flag:= false
-    //Шаг 6
-    else begin
-      s:= getIndexOfMinInRow(matrix, k, false);
-      continue;
-    end;
-  end;}
-end;    
-
-function isMemberEmpty(member: array of real): Boolean;
-begin  
-  for var i:= 0 to member.Length do
-    if(member[i] <> 0) then begin
-      Result:= false;
-    end;
-  Result:= true;
+  until (isMemberEmpty(self.storagesVector) = false) and (isMemberEmpty(self.shopsVector) = false);
 end;
 
-function getIndexOfMinInRow(matrix: array[,] of real; row: integer; isRowVertical: boolean): integer;
+function isMemberEmpty(member: array of real): Boolean;
 begin
-  Result:= 0;
-  if(isRowVertical) then
-    for var i:=1 to matrix.GetLength(0)-1 do
-      if(matrix[i, row] < matrix[Result, row]) then
-        Result:= i
+  var count:= 0;
+  for var i:= 0 to member.Length - 1 do
+    if(member[i] <> 0) then begin
+      count:= count + 1;
+    end;
+  if(count = 0) then
+    Result:= false
   else
-    for var j:=1 to matrix.GetLength(1) -1 do
-      if(matrix[row, j] < matrix[row, Result]) then
-        Result:= j;      
+    Result:= true;
+end;
+
+function getIndexOfMinInRow(matrix: array[,] of real; row: integer; member: array of real; isRowVertical: boolean): integer;
+begin
+  if(isRowVertical) then begin
+    Result:= 0;
+    for var i:=0 to member.Length-1 do begin
+      if(matrix[i, row] <= matrix[Result, row]) and (member[i] > 0) then begin
+          Result:= i;
+      end;
+    end;
+  end
+  else begin
+    Result:= 0;
+    for var j:=0 to member.Length -1 do
+      if(matrix[row, j] <= matrix[row, Result]) and (member[j] > 0) then begin
+        Result:= j;
+      end;
+  end;         
 end;
 
 procedure printMatrix(matrix: array[,] of real);
@@ -165,8 +133,8 @@ begin
   for var i:= 0 to matrix.GetLength(0)-1 do begin
     for var j:= 0 to matrix.GetLength(1)-1 do
       write(matrix[i,j]:4);
+    writeln();
   end;
-  writeln();
 end;  
 
 end.
