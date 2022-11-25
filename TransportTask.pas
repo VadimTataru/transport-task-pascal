@@ -16,6 +16,6 @@ var
   );
 
 begin
-  transportTask.Print();
-  writeln(findIndecesOfMinRate(matrixExample));
+  var tempMatrix:= minTariffMethod(matrixExample, storagesVectorExample, shopsVectorExample);
+  printMatrix(tempMatrix);
 end.
