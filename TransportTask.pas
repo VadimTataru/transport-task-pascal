@@ -27,10 +27,20 @@ var
   shopsPotentials := new real[4](0,0,0,0);
   
 begin
-  var tempMatrix:= transportTask.minTariffMethod();
-  writeln(transportTask.calculateFunction(tempMatrix));
-  transportTask.findPotentials(storagesPotentials, shopsPotentials, tempMatrix);
-  printVector(storagesPotentials);
+  // составление плана
+  writeln('---------------- Составление плана ----------------');
+  var matrix:= transportTask.minTariffMethod();
+  printMatrix(matrix);
+  // оптимизация плана
+  writeln('---------------- Оптимизация плана ----------------');
+  while (true) do begin
+    writeln('F = ', transportTask.calculateFunction(matrix));
+  transportTask.findPotentials(storagesPotentials, shopsPotentials, matrix);
   writeln();
-  printVector(shopsPotentials);
+  var indeces := transportTask.checkPotentials(storagesPotentials, shopsPotentials, matrix);
+  if(indeces.Item1 = -1) and (indeces.Item2 = -1) then
+    break
+  else
+    transportTask.findContour(indeces, matrix);
+  end;  
 end.

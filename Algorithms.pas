@@ -23,7 +23,11 @@ type TransportTaskSolver = record
   
   procedure print;
   procedure findPotentials(storegesPotentials, shopsPotentials: array of real; matrix: array[,] of real);
+  procedure findContour(startCell: (integer, integer); matrix: array[,] of real);
   
+  function findMinContourElem(contourPath: array of integer): real;
+  function stepContour(prevCell: (integer, integer); contourPath: array of integer; mode: string): boolean;
+  function checkPotentials(storegesPotentials, shopsPotentials: array of real; matrix: array[,] of real): (integer, integer);
   function minTariffMethod(): array[,] of real;
   function calculateFunction(matrix: array[,] of real): real;
   
@@ -40,6 +44,7 @@ procedure printMatrix(matrix: array[,] of real);
 procedure printVector(vector: array of real);
 procedure fillVectorWithBool(vector: array of boolean; fillBy: boolean);
 procedure fillVectorWithNaN(vector: array of real);
+procedure fillVectorWithInteger(vector: array of integer; fillBy: integer);
 
 implementation
 
@@ -53,6 +58,38 @@ begin
     write('a' + i:charSpace );
   Writeln();
   Writeln('————————————————————————————————————————————————————');
+end;
+
+procedure TransportTaskSolver.findContour(startCell: (integer, integer); matrix: array[,] of real);
+var multiplyer: integer;
+begin
+  var contourPath := new integer[(self.shopsVector.Length + self.storagesVector.Length) * 2];
+  fillVectorWithInteger(contourPath, -1);
+  contourPath[0] := startCell.Item1;
+  contourPath[1] := startCell.Item2;
+  
+  var answer := stepContour(startCell, contourPath, 'hor');
+  var minElem := findMinContourElem(contourPath);
+  
+  for var i := 0 to contourPath.Length - 1 do
+    if(contourPath[i] <> -1) and (contourPath[i+1] <> -1) and (i mod 2 = 0) then begin
+      if (round(i / 2) mod 2 = 0) then multiplyer := 1 else multiplyer := -1;
+      matrix[contourPath[i], contourPath[i+1]] := matrix[contourPath[i], contourPath[i+1]] + minElem * multiplyer;
+      if(matrix[contourPath[i], contourPath[i+1]] > 0) then
+        self.flagContent[contourPath[i], contourPath[i+1]] := false
+      else
+        self.flagContent[contourPath[i], contourPath[i+1]] := true;
+    end;  
+end;
+
+function TransportTaskSolver.stepContour(prevCell: (integer, integer); contourPath: array of integer; mode: string): boolean;
+begin
+  result:= false;
+end;
+
+function TransportTaskSolver.findMinContourElem(contourPath: array of integer): real;
+begin
+  result := 0;
 end;
 
 function TransportTaskSolver.minTariffMethod(): array[,] of real;
@@ -129,6 +166,23 @@ begin
   end;
 end;
 
+function TransportTaskSolver.checkPotentials(storegesPotentials, shopsPotentials: array of real; matrix: array[,] of real): (integer, integer);
+begin
+  var minDiff := integer.MaxValue;
+  Result := (-1, -1);
+  
+  for var i := 0 to self.storagesVector.Length - 1 do
+    for var j := 0 to self.shopsVector.Length - 1 do begin
+      if(matrix[i, j] = 0) then begin
+        var diff := round(self.rateMatrix[i,j] - storegesPotentials[i] - shopsPotentials[j]);
+        if(diff < 0) and (diff < minDiff) then begin
+          minDiff := diff;
+          result := (i, j);
+        end;
+      end;
+    end;
+end;
+
 //Self func and procedure. End.
 
 function findIndecesOfMinRate(matrix: array[,] of real): (integer, integer);
@@ -195,6 +249,12 @@ procedure printVector(vector: array of real);
 begin
   for var i:= 0 to vector.Length - 1 do
     write(vector[i]);
+end;
+
+procedure fillVectorWithInteger(vector: array of integer; fillBy: integer);
+begin
+  for var i:= 0 to vector.Length - 1 do
+    vector[i]:= fillBy;
 end;
 
 procedure fillVectorWithBool(vector: array of boolean; fillBy: boolean);
