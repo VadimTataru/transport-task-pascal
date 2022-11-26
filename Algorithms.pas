@@ -25,7 +25,7 @@ type TransportTaskSolver = record
   procedure findPotentials(storegesPotentials, shopsPotentials: array of real; matrix: array[,] of real);
   procedure findContour(startCell: (integer, integer); matrix: array[,] of real);
   
-  function findMinContourElem(contourPath: array of integer): real;
+  function findMinContourElem(contourPath: array of integer; matrix: array[,] of real): real;
   function stepContour(prevCell: (integer, integer); contourPath: array of integer; mode: string): boolean;
   function checkPotentials(storegesPotentials, shopsPotentials: array of real; matrix: array[,] of real): (integer, integer);
   function minTariffMethod(): array[,] of real;
@@ -38,9 +38,11 @@ function findIndecesOfMinRate(matrix: array[,] of real): (integer, integer);
 function getIndexOfMinInRow(matrix: array[,] of real; row: integer; member: array of real; isRowVertical: boolean): integer;
 function isMemberEmpty(member: array of real): boolean;
 function indexOfNaN(vector: array of real): integer;
+function indexOfInt(vector: array of integer; val: integer): integer;
 
 //procedires
 procedure printMatrix(matrix: array[,] of real);
+procedure printMatrixInt(matrix: array of integer);
 procedure printVector(vector: array of real);
 procedure fillVectorWithBool(vector: array of boolean; fillBy: boolean);
 procedure fillVectorWithNaN(vector: array of real);
@@ -69,7 +71,9 @@ begin
   contourPath[1] := startCell.Item2;
   
   var answer := stepContour(startCell, contourPath, 'hor');
-  var minElem := findMinContourElem(contourPath);
+  writeln('Контур');
+  printMatrixInt(contourPath);
+  var minElem := findMinContourElem(contourPath, matrix);
   
   for var i := 0 to contourPath.Length - 1 do
     if(contourPath[i] <> -1) and (contourPath[i+1] <> -1) and (i mod 2 = 0) then begin
@@ -79,17 +83,127 @@ begin
         self.flagContent[contourPath[i], contourPath[i+1]] := false
       else
         self.flagContent[contourPath[i], contourPath[i+1]] := true;
-    end;  
+    end;
+  writeln();
+  printMatrix(matrix);
 end;
 
 function TransportTaskSolver.stepContour(prevCell: (integer, integer); contourPath: array of integer; mode: string): boolean;
 begin
+  var indexCell := (-1, -1);
+  var firstFree := indexOfInt(contourPath, -1);
+  
+  if(mode = 'hor') then begin
+    var flagFindAnswer := false;
+    for var i := prevCell.Item2 + 1 to self.shopsVector.Length - 1 do begin
+      if(not self.flagContent[prevCell.Item1, i]) then
+        if(firstFree > -1) and (firstFree + 1 < contourPath.Length) then begin
+          indexCell := (prevCell.Item1, i);
+          contourPath[firstFree] := indexCell.Item1;
+          contourPath[firstFree + 1] := indexCell.Item2;
+          flagFindAnswer := stepContour(indexCell, contourPath, 'vert');
+          if(not flagFindAnswer) then begin
+            contourPath[firstFree] := -1;
+            contourPath[firstFree + 1] := -1;
+            indexCell := (-1, -1);
+          end;
+        end;
+        if(indexCell.Item1 <> -1) and (indexCell.Item2 <> -1) then begin
+          result:= true;
+          exit;
+        end;          
+    end;
+    if(not flagFindAnswer) then begin
+      for var i := prevCell.Item2 - 1 downto 0 do begin
+        if(not self.flagContent[prevCell.Item1, i]) then
+          if(firstFree > -1) and (firstFree + 1 < contourPath.Length) then begin
+            indexCell := (prevCell.Item1, i);
+            contourPath[firstFree] := indexCell.Item1;
+            contourPath[firstFree + 1] := indexCell.Item2;
+            flagFindAnswer := stepContour(indexCell, contourPath, 'vert');
+            if(not flagFindAnswer) then begin
+              contourPath[firstFree] := -1;
+              contourPath[firstFree + 1] := -1;
+              indexCell := (-1, -1);
+            end;
+          end;
+          if(indexCell.Item1 <> -1) and (indexCell.Item2 <> -1) then begin
+            result:= true;
+            exit;
+          end;
+      end;
+    end;
+  end;
+  
+  if(mode = 'vert') then begin
+    var flagFindAnswer := false;
+    for var j := prevCell.Item1 + 1 to self.storagesVector.Length - 1 do begin
+      if(not self.flagContent[j, prevCell.Item2]) then
+        if(firstFree > -1) and (firstFree + 1 < contourPath.Length) then begin
+          indexCell := (j, prevCell.Item2);
+          contourPath[firstFree] := indexCell.Item1;
+          contourPath[firstFree + 1] := indexCell.Item2;
+          flagFindAnswer := stepContour(indexCell, contourPath, 'hor');
+          if(not flagFindAnswer) then begin
+            contourPath[firstFree] := -1;
+            contourPath[firstFree + 1] := -1;
+            indexCell := (-1, -1);
+          end;
+        end;
+        if(indexCell.Item1 <> -1) and (indexCell.Item2 <> -1) then begin
+          result:= true;
+          exit;
+        end;          
+    end;
+    if(not flagFindAnswer) then begin
+      for var j := prevCell.Item1 - 1 downto 0 do begin
+        if(not self.flagContent[j, prevCell.Item2]) then
+          if(firstFree > -1) and (firstFree + 1 < contourPath.Length) then begin
+            indexCell := (j, prevCell.Item2);
+            contourPath[firstFree] := indexCell.Item1;
+            contourPath[firstFree + 1] := indexCell.Item2;
+            flagFindAnswer := stepContour(indexCell, contourPath, 'hor');
+            if(not flagFindAnswer) then begin
+              contourPath[firstFree] := -1;
+              contourPath[firstFree + 1] := -1;
+              indexCell := (-1, -1);
+            end;
+          end;
+          if(indexCell.Item1 <> -1) and (indexCell.Item2 <> -1) then begin
+            result:= true;
+            exit;
+          end;
+      end;
+    end;
+  end;
+  if((prevCell.Item1 <> contourPath[2]) or (prevCell.Item2 <> contourPath[3])) 
+      and ((prevCell.Item1 <> contourPath[0]) or (prevCell.Item2 <> contourPath[1])) then begin
+        result:= true;
+        exit;
+      end;
   result:= false;
 end;
 
-function TransportTaskSolver.findMinContourElem(contourPath: array of integer): real;
+function TransportTaskSolver.findMinContourElem(contourPath: array of integer; matrix: array[,] of real): real;
 begin
-  result := 0;
+  var minElem := integer.MaxValue;
+  for var i := 0 to contourPath.Length - 1 do begin
+    if (i mod 2 = 0) then begin
+      var elem := integer.MaxValue;
+      if(contourPath[i] <> -1) and (contourPath[i + 1] <> -1) then begin
+        if (round(i / 2) mod 2 <> 0) then
+          elem := round(matrix[contourPath[i], contourPath[i + 1]]);
+      end
+      else begin
+        result := minElem;
+        exit;
+      end;
+      if(not self.flagContent[contourPath[i], contourPath[i + 1]]) and (elem < minElem) then
+        minElem := round(matrix[contourPath[i], contourPath[i + 1]]);
+    end;
+  end;
+  result := minElem;
+  exit;
 end;
 
 function TransportTaskSolver.minTariffMethod(): array[,] of real;
@@ -236,12 +350,29 @@ begin
     result:= -1;
 end;
 
+function indexOfInt(vector: array of integer; val: integer): integer;
+begin
+  for var i:= 0 to vector.Length - 1 do
+    if(vector[i] = val) then begin      
+      result:= i;
+      exit;
+    end;
+    result:= -1;
+end;
+
 procedure printMatrix(matrix: array[,] of real);
 begin
   for var i:= 0 to matrix.GetLength(0)-1 do begin
     for var j:= 0 to matrix.GetLength(1)-1 do
       write(matrix[i,j]:4);
     writeln();
+  end;
+end;
+
+procedure printMatrixInt(matrix: array of integer);
+begin
+  for var i:= 0 to matrix.Length - 1 do begin
+      write(matrix[i]:4);
   end;
 end;
 

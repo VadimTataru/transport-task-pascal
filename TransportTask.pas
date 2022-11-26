@@ -40,7 +40,8 @@ begin
   var indeces := transportTask.checkPotentials(storagesPotentials, shopsPotentials, matrix);
   if(indeces.Item1 = -1) and (indeces.Item2 = -1) then
     break
-  else
-    transportTask.findContour(indeces, matrix);
+  else begin
+      transportTask.findContour(indeces, matrix);
+    end;    
   end;  
 end.
