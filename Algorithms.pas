@@ -24,12 +24,14 @@ type TransportTaskSolver = record
   procedure print;
   procedure findPotentials(storegesPotentials, shopsPotentials: array of real; matrix: array[,] of real);
   procedure findContour(startCell: (integer, integer); matrix: array[,] of real);
+  procedure step(startCell: (integer, integer); matrix: array[,] of real);
   
   function findMinContourElem(contourPath: array of integer; matrix: array[,] of real): real;
   function stepContour(prevCell: (integer, integer); contourPath: array of integer; mode: string): boolean;
   function checkPotentials(storegesPotentials, shopsPotentials: array of real; matrix: array[,] of real): (integer, integer);
   function minTariffMethod(): array[,] of real;
   function calculateFunction(matrix: array[,] of real): real;
+  function findMinRate(prevIndeces: (integer, integer)): (integer, integer);
   
 end;
 
@@ -86,6 +88,41 @@ begin
     end;
   writeln();
   printMatrix(matrix);
+end;
+
+procedure TransportTaskSolver.step(startCell: (integer, integer); matrix: array[,] of real);
+var content: real;
+begin
+  if(self.storagesVector[startCell.Item1] < self.shopsVector[startCell.Item2]) then 
+    content := self.storagesVector[startCell.Item1]
+  else
+    content := self.shopsVector[startCell.Item2];
+  self.flagContent[startCell.Item1, startCell.Item2] := false;
+  self.storagesVector[startCell.Item1] := self.storagesVector[startCell.Item1] - content;
+  self.shopsVector[startCell.Item2] := self.shopsVector[startCell.Item2] - content;
+  matrix[startCell.Item1, startCell.Item2] := content;
+end;
+
+function TransportTaskSolver.findMinRate(prevIndeces: (integer, integer)): (integer, integer);
+begin
+  result := prevIndeces;
+  var old := prevIndeces;
+  if(self.storagesVector[result.Item1] > 0) then begin
+    for var i:= 0 to self.shopsVector.Length - 1 do
+      if(self.flagContent[result.Item1, i]) and (self.shopsVector[i] <> 0) then
+        if((old.Item2 = result.Item2) or (self.rateMatrix[result.Item1, i] < self.rateMatrix[result.Item1, result.Item2])) then
+          result := (prevIndeces.Item1, i);
+  end
+  else if(self.shopsVector[result.Item2] > 0) then begin
+    for var j:=0 to self.storagesVector.Length - 1 do
+      if(self.flagContent[j, result.Item2]) and (self.storagesVector[j] <> 0) then
+        if((old.Item1 = result.Item1) or (self.rateMatrix[j, result.Item2] < self.rateMatrix[result.Item1, result.Item2])) then
+          result := (j, prevIndeces.Item2);
+  end
+  else begin
+    result:= (-1,-1);
+    exit;
+  end;
 end;
 
 function TransportTaskSolver.stepContour(prevCell: (integer, integer); contourPath: array of integer; mode: string): boolean;
@@ -304,7 +341,7 @@ begin
   Result:= (0,0);  
   for var i:= 0 to matrix.GetLength(0) - 1 do
     for var j:= 0 to matrix.GetLength(1) - 1 do
-      if(matrix[i,j] < matrix[Result[0], Result[1]]) then
+      if(matrix[i,j] <= matrix[Result[0], Result[1]]) then
         Result:= (i, j);  
 end;
 
