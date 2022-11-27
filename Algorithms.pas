@@ -73,6 +73,7 @@ begin
   contourPath[1] := startCell.Item2;
   
   var answer := stepContour(startCell, contourPath, 'hor');
+  writeln();
   writeln('Контур');
   printMatrixInt(contourPath);
   var minElem := findMinContourElem(contourPath, matrix);
@@ -87,6 +88,7 @@ begin
         self.flagContent[contourPath[i], contourPath[i+1]] := true;
     end;
   writeln();
+  writeln('---------------- Улучшенный план ----------------');
   printMatrix(matrix);
 end;
 

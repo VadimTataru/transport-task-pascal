@@ -68,6 +68,7 @@ begin
   // оптимизация плана
   writeln('---------------- Оптимизация плана ----------------');
   while (true) do begin
+    writeln();
     writeln('F = ', transportTask.calculateFunction(matrix));
   transportTask.findPotentials(storagesPotentials, shopsPotentials, matrix);
   writeln();
@@ -78,4 +79,12 @@ begin
       transportTask.findContour(indeces, matrix);
     end;    
   end;
+  
+  writeln('---------------- Ответ ----------------');
+  writeln();
+  writeln('---------------- Конечный план ----------------');
+  printMatrix(matrix);
+  writeln();
+  writeln('F = ', transportTask.calculateFunction(matrix));
+  
 end.
