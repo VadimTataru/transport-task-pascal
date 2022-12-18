@@ -48,88 +48,32 @@ implementation
 
 procedure TransportationMatrix.Print();
 var
-  cellWidth: integer := 9;
-begin
-  // potentials row
-  Write('':cellWidth + 6);
-  for var i := 0 to self._potentialsRow.Length - 1 do
-    Write($'{self._potentialsRow[i]}    ':cellWidth + 1);
-  Writeln();
-  
-  // 1st row
-  Write('':cellWidth + 5, '|');
-  for var i := 0 to self._rateMatrix.GetLength(1) - 1 do
-    Write('':cellWidth, '|');
-  Writeln();
-  Write('':cellWidth + 5, '|');
-  for var i := 0 to self._rateMatrix.GetLength(1) - 1 do
-    Write($'a{i + 1}   ':cellWidth, '|');
-  Writeln();
-  Write('':cellWidth + 5, '|');
-  for var i := 0 to self._rateMatrix.GetLength(1) - 1 do
-    Write('':cellWidth, '|');
-  Writeln();
-  
-  // divider
-  Write('——————————':cellWidth + 6);
-  for var i := 0 to self._rateMatrix.GetLength(1) do
-    Write('——————————':cellWidth + 1);
-  Writeln();
-  
+  cellWidth: integer := 6;
+begin  
   // matrix
   for var i := 0 to self._rateMatrix.GetLength(0) - 1 do
   begin
-    // rates row
     Write('':cellWidth + 5, '|');
-    for var j := 0 to self._rateMatrix.GetLength(1) - 1 do
-      Write(self._rateMatrix[i,j]:cellWidth, '|');
-    Writeln();
-    // empty row
-    Write('':cellWidth + 5, '|');
-    for var j := 0 to self._rateMatrix.GetLength(1) - 1 do
-      Write('':cellWidth, '|');
-    Writeln();
-    
-    // potential column
-    Write($'{self._potentialsColumn[i]}':cellWidth - 4);
-    
     // cargo to transit row
-    Write($'A{i + 1}   ':cellWidth, '|');
     for var j := 0 to self._cargoToTransitMatrix.GetLength(1) - 1 do
       Write($'{self._cargoToTransitMatrix[i,j]}   ':cellWidth, '|');
     // manufacturer volume
     Write($'{self._manufacturerVolumes[i]}   ':cellWidth);
     Writeln();
-    // empty row
-    Write('':cellWidth + 5, '|');
-    for var j := 0 to self._rateMatrix.GetLength(1) - 1 do
-      Write('':cellWidth, '|');
-    Writeln();
-    Write('':cellWidth + 5, '|');
-    for var j := 0 to self._rateMatrix.GetLength(1) - 1 do
-      Write('':cellWidth, '|');
-    Writeln();
     // divider
-    Write('——————————':cellWidth + 6);
+    Write('——————':cellWidth + 6);
     for var j := 0 to self._rateMatrix.GetLength(1) do
-      Write('——————————':cellWidth + 1);
+      Write('———————':cellWidth + 1);
     Writeln();
   end;
   
   // customer volume
   Write('':cellWidth + 5, '|');
   for var i := 0 to self._rateMatrix.GetLength(1) - 1 do
-      Write('':cellWidth, '|');
-  Writeln();
-  Write('':cellWidth + 5, '|');
-  for var i := 0 to self._rateMatrix.GetLength(1) - 1 do
     Write($'{self._customerVolumes[i]}   ':cellWidth, '|');
   Writeln();
-  Write('':cellWidth + 5, '|');
-  for var i := 0 to self._rateMatrix.GetLength(1) - 1 do
-    Write('':cellWidth, '|');
-  Writeln();
 end;
+
 
 procedure TransportationMatrix.DistributeCargo();
 var
