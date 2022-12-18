@@ -1,90 +1,155 @@
-﻿uses Algorithms;
+﻿uses CoreLib;
+
 var
+  optimizingStep: integer := 1;
+  currentExample: TransportationMatrix;
   
-  //First Example. Start
-  {matrixExample := new real[3,4](
+  rateMatrixExample1: array[,] of integer := (
+    ( 7, 1, 4,  5,  2),
+    (13, 4, 7,  6,  3),
+    ( 3, 8, 0, 18, 12),
+    ( 9, 5, 3,  4,  7)
+  );
+  manufacturerVolumesExample1: array of integer := (85, 112, 72, 120);
+  customerVolumesExample1: array of integer := (75, 125, 64, 65, 60);
+  potentialsRowExample1: array of integer := ArrFill(5, 0);
+  potentialsColumnExample1: array of integer := ArrFill(4, 0);
+  example1: TransportationMatrix := new TransportationMatrix(
+    rateMatrixExample1,
+    manufacturerVolumesExample1,
+    customerVolumesExample1,
+    potentialsRowExample1,
+    potentialsColumnExample1
+  );
+  
+  rateMatrixExample2: array[,] of integer := (
     (2, 1, 3, 2),
     (2, 3, 3, 1),
     (3, 3, 2, 1)
-  );  
-  flagContentExample := new boolean[3,4](
-    (true, true, true, true), 
-    (true, true, true, true), 
-    (true, true, true, true)
-  );  
-  storagesVectorExample := new real[3](90, 70, 50);
-  shopsVectorExample := new real[4](80, 60, 40, 30);
-  
-  storagesPotentials := new real[3](0,0,0);
-  shopsPotentials := new real[4](0,0,0,0);
-  //First Example. End}
-  
-  //Second Example. Start
-  matrixExample := new real[4,5](
-    (7, 1, 4, 5, 2),
-    (13, 4, 7, 6, 3),
-    (3, 8, 0, 18, 12),
-    (9, 5, 3, 4, 7)
-  );  
-  flagContentExample := new boolean[4,5](
-    (true, true, true, true, true), 
-    (true, true, true, true, true),
-    (true, true, true, true, true),
-    (true, true, true, true, true)
-  );  
-  storagesVectorExample := new real[4](85, 112, 72, 120);
-  shopsVectorExample := new real[5](75, 125, 64, 65, 60);
-  
-  storagesPotentials := new real[4](0,0,0,0);
-  shopsPotentials := new real[5](0,0,0,0,0);
-  //Second Example. End
-  
-  transportTask: TransportTaskSolver := (
-    rateMatrix: matrixExample;
-    flagContent: flagContentExample;
-    storagesVector: storagesVectorExample;
-    shopsVector: shopsVectorExample;
+  );
+  manufacturerVolumesExample2: array of integer := (90, 70, 50);
+  customerVolumesExample2: array of integer := (80, 60, 40, 30);
+  potentialsRowExample2: array of integer := new integer[4];
+  potentialsColumnExample2: array of integer := new integer[3];
+  example2: TransportationMatrix := new TransportationMatrix(
+    rateMatrixExample2,
+    manufacturerVolumesExample2,
+    customerVolumesExample2,
+    potentialsRowExample2,
+    potentialsColumnExample2
   );
   
-  startIndeces: (integer, integer);
+  rateMatrixExample3: array[,] of integer := (
+    (12,  5,  3, 11),
+    ( 2, 17, 30,  4),
+    (23,  3, 12,  1)
+  );
+  manufacturerVolumesExample3: array of integer := (55, 93, 27);
+  customerVolumesExample3: array of integer := (42, 63, 57, 13);
+  potentialsRowExample3: array of integer := new integer[4];
+  potentialsColumnExample3: array of integer := new integer[3];
+  example3: TransportationMatrix := new TransportationMatrix(
+    rateMatrixExample3,
+    manufacturerVolumesExample3,
+    customerVolumesExample3,
+    potentialsRowExample3,
+    potentialsColumnExample3
+  );
   
+  rateMatrixExample4: array[,] of integer := (
+    ( 2, 24,  4,  2,  3),
+    (20, 10, 15, 27,  7),
+    (15, 15, 12, 25, 19),
+    ( 2,  6,  3,  5,  5)
+  );
+  manufacturerVolumesExample4: array of integer := (28, 13, 15, 30);
+  customerVolumesExample4: array of integer := (27, 16, 25, 11, 7);
+  potentialsRowExample4: array of integer := new integer[5];
+  potentialsColumnExample4: array of integer := new integer[4];
+  example4: TransportationMatrix := new TransportationMatrix(
+    rateMatrixExample4,
+    manufacturerVolumesExample4,
+    customerVolumesExample4,
+    potentialsRowExample4,
+    potentialsColumnExample4
+  );
+  
+  rateMatrixExample5: array[,] of integer := (
+    (16, 30, 17, 10,  4),
+    (30, 27, 26,  9, 23),
+    (13,  4, 22,  3,  1),
+    ( 3,  1,  5,  4, 24)
+  );
+  manufacturerVolumesExample5: array of integer := (4, 6, 10, 10);
+  customerVolumesExample5: array of integer := (7, 7, 7, 7, 2);
+  potentialsRowExample5: array of integer := new integer[5];
+  potentialsColumnExample5: array of integer := new integer[4];
+  example5: TransportationMatrix := new TransportationMatrix(
+    rateMatrixExample5,
+    manufacturerVolumesExample5,
+    customerVolumesExample5,
+    potentialsRowExample5,
+    potentialsColumnExample5
+  );
+  
+  rateMatrixExample6: array[,] of integer := (
+    ( 5, 15,  3,  6, 10),
+    (23,  8, 13, 27, 12),
+    (30,  1,  5, 24, 25),
+    ( 8, 26,  7, 28,  9)
+  );
+  manufacturerVolumesExample6: array of integer := (9, 11, 14, 16);
+  customerVolumesExample6: array of integer := (8, 9, 13, 8, 12);
+  potentialsRowExample6: array of integer := new integer[5];
+  potentialsColumnExample6: array of integer := new integer[4];
+  example6: TransportationMatrix := new TransportationMatrix(
+    rateMatrixExample6,
+    manufacturerVolumesExample6,
+    customerVolumesExample6,
+    potentialsRowExample6,
+    potentialsColumnExample6
+  );
+
 begin
-  // составление плана
-  var matrix := new real[transportTask.rateMatrix.GetLength(0), transportTask.rateMatrix.GetLength(1)];
-  //startIndeces := findIndecesOfMinRate(transportTask.rateMatrix);
-  startIndeces := (2, 2);
-  writeln('---------------- Составление плана ----------------');
-  while(true) do begin
-    transportTask.step(startIndeces, matrix);
-    //printMatrix(matrix); 
-    var prevIndeces:= startIndeces;
-    startIndeces := transportTask.findMinRate(prevIndeces);
-    if(startIndeces = (-1,-1)) then
-      break;
+//  Console.OutputEncoding := System.Text.Encoding.GetEncoding(866);
+//  TextColor(15); // белый цвет шрифта в консоли
+  Writeln('Исходная матрица');
+  
+  currentExample := example6;
+  currentExample.Print();
+  
+  var minRateIndexes := currentExample.FindMinRateCellIndexes();
+  Writeln(
+    'Индекс элемента с минимальным тарифом: ',
+    $'({minRateIndexes.Item1 + 1} {minRateIndexes.Item2 + 1})'
+  );
+  
+  Writeln('==============================================================================');
+  currentExample.DistributeCargo();
+  currentExample.CalculatePotentials();
+  Writeln('Результат первоначального распределения');
+  currentExample.Print();
+  
+  while (true) do
+  begin
+    var pivotCellIndexes := currentExample.FindPivotCellIndexes();
+    if (pivotCellIndexes = (-1, -1)) then
+    begin
+      Writeln('Ответ: ');
+      var totalPrice := currentExample.CalculatePrice();
+      Writeln($'f = {totalPrice}');
+      exit;
+    end;
+    
+    var path := currentExample.FindPath(pivotCellIndexes);
+    Writeln($'Индекс начального элемента контура: ({path[0].Item1 + 1} {path[0].Item2 + 1})');
+    
+    Writeln('============================================================================');
+    currentExample.Optimize(path);
+    currentExample.CalculatePotentials();
+    Writeln($'Оптимизация {optimizingStep}');
+    currentExample.Print();
+    
+    optimizingStep += 1;    
   end;
-  //var matrix:= transportTask.minTariffMethod();
-  printMatrix(matrix);  
-  
-  // оптимизация плана
-  writeln('---------------- Оптимизация плана ----------------');
-  while (true) do begin
-    writeln();
-    writeln('F = ', transportTask.calculateFunction(matrix));
-  transportTask.findPotentials(storagesPotentials, shopsPotentials, matrix);
-  writeln();
-  var indeces := transportTask.checkPotentials(storagesPotentials, shopsPotentials, matrix);
-  if(indeces.Item1 = -1) and (indeces.Item2 = -1) then
-    break
-  else begin
-      transportTask.findContour(indeces, matrix);
-    end;    
-  end;
-  
-  writeln('---------------- Ответ ----------------');
-  writeln();
-  writeln('---------------- Конечный план ----------------');
-  printMatrix(matrix);
-  writeln();
-  writeln('F = ', transportTask.calculateFunction(matrix));
-  
 end.
